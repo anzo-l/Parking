@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('parking_spaces', function (Blueprint $table) {
             $table->id();
             $table->string('numero_place')->unique();
-            $table->integer('etage');
             $table->boolean('disponible')->default(true);
             $table->enum('type_place', ['normal', 'pmr', 'reserve'])->default('normal');
             $table->timestamps();
