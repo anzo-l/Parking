@@ -20,7 +20,9 @@ Route::middleware('auth')->group(function () {
     
     Route::post('/reservation', [ReservationController::class, 'store'])->name('reservation.store');
     Route::post('/reservation/{reservation}/cancel', [ReservationController::class, 'cancel'])->name('reservation.cancel');
-    
+});
+
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin');
 });
 

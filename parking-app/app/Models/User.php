@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'is_admin',
+        'current_parking_space_id',
     ];
 
     /**
@@ -44,5 +46,25 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function parking_space()
+    {
+        return $this->belongsTo(ParkingSpace::class, 'current_parking_space_id');
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    public function liste_attente()
+    {
+        return $this->hasOne(ListeAttente::class);
+    }
+
+    public function historique_attributions()
+    {
+        return $this->hasMany(HistoriqueAttributions::class, 'utilisateur_id');
     }
 }
