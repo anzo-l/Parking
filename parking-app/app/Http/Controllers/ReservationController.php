@@ -5,24 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\Reservation;
 use App\Models\ParkingSpace;
 use App\Models\ListeAttente;
-use Illuminate\Http\Request;
+use App\Models\HistoriqueAttributions;
 use Illuminate\Support\Facades\Auth;
 
 class ReservationController extends Controller
 {
-    /**
-     * Créer une réservation ou ajouter à la liste d'attente
-     */
-    public function store(Request $request)
+    public function store()
     {
-        $user = Auth::user();
+        $userId = Auth::id();
 
-        if (!$user) {
-            return back()->with('error', 'Vous devez être connecté.');
-        }
-
-        // Vérifier si l'utilisateur a déjà une réservation active
-        $existingReservation = Reservation::where('user_id', $user->id)
+        // Vérifier réservation active
+        $existingReservation = Reservation::where('user_id', $userId)
             ->where('statut', 'confirmee')
             ->first();
 
@@ -30,30 +23,41 @@ class ReservationController extends Controller
             return back()->with('error', 'Vous avez déjà une réservation active.');
         }
 
-        // Chercher une place libre
+        // Vérifier si en liste d'attente
+        $inWaitList = ListeAttente::where('user_id', $userId)->exists();
+
+        if ($inWaitList) {
+            return back()->with('error', 'Vous êtes déjà en file d\'attente.');
+        }
+
+        // Chercher place libre
         $parkingSpace = ParkingSpace::where('disponible', true)->first();
 
         if ($parkingSpace) {
-            // Rendre la place occupée
             $parkingSpace->update(['disponible' => false]);
 
-            // Créer la réservation
             Reservation::create([
-                'user_id' => $user->id,
+                'user_id' => $userId,
                 'parking_space_id' => $parkingSpace->id,
                 'date_debut' => now(),
                 'date_fin' => now()->addDays(1),
                 'statut' => 'confirmee'
             ]);
 
+            HistoriqueAttributions::create([
+                'user_id' => $userId,
+                'parking_space_id' => $parkingSpace->id,
+                'date_attribution' => now()
+            ]);
+
             return back()->with('success', 'Place attribuée : ' . $parkingSpace->numero_place);
         }
 
-        // Sinon ajouter à la liste d'attente
+        // Ajouter à liste attente
         $position = ListeAttente::max('position') ?? 0;
 
         ListeAttente::create([
-            'user_id' => $user->id,
+            'user_id' => $userId,
             'position' => $position + 1,
             'date_inscription' => now()
         ]);
@@ -61,19 +65,44 @@ class ReservationController extends Controller
         return back()->with('success', 'Ajouté en file d\'attente position ' . ($position + 1));
     }
 
-    /**
-     * Annuler une réservation
-     */
     public function cancel(Reservation $reservation)
     {
-        $user = Auth::user();
+        $userId = Auth::id();
 
-        if (!$user || $reservation->user_id !== $user->id) {
-            return back()->with('error', 'Vous ne pouvez pas annuler cette réservation.');
+        if ($reservation->user_id !== $userId) {
+            return back()->with('error', 'Non autorisé.');
         }
 
         $reservation->update(['statut' => 'annulee']);
-        $reservation->parking_space->update(['disponible' => true]);
+        $parkingSpace = $reservation->parking_space;
+
+        // Récupérer première personne en attente
+        $nextUser = ListeAttente::orderBy('position')->first();
+
+        if ($nextUser) {
+            $parkingSpace->update(['disponible' => false]);
+
+            Reservation::create([
+                'user_id' => $nextUser->user_id,
+                'parking_space_id' => $parkingSpace->id,
+                'date_debut' => now(),
+                'date_fin' => now()->addDays(1),
+                'statut' => 'confirmee'
+            ]);
+
+            HistoriqueAttributions::create([
+                'user_id' => $nextUser->user_id,
+                'parking_space_id' => $parkingSpace->id,
+                'date_attribution' => now()
+            ]);
+
+            $nextUser->delete();
+
+            ListeAttente::where('position', '>', $nextUser->position)
+                ->decrement('position');
+        } else {
+            $parkingSpace->update(['disponible' => true]);
+        }
 
         return back()->with('success', 'Réservation annulée.');
     }
