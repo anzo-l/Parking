@@ -12,4 +12,14 @@ class ParkingSpace extends Model
     {
         return $this->hasMany(Reservation::class);
     }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'current_parking_space_id');
+    }
+
+    public function historique_attributions()
+    {
+        return $this->hasMany(HistoriqueAttributions::class);
+    }
 }

@@ -6,12 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class HistoriqueAttributions extends Model
 {
-    protected $fillable = ['user_id', 'parking_space_id', 'date_attribution'];
+    protected $fillable = ['utilisateur_id', 'parking_space_id', 'date_debut', 'date_fin'];
     protected $table = 'historique_attributions';
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'utilisateur_id');
     }
 
     public function parking_space()
