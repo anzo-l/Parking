@@ -14,21 +14,37 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
+    <body class="font-sans antialiased bg-white">
+        <div class="min-h-screen flex flex-col">
+            <!-- Header with Navigation -->
+            <header class="bg-parking-header-gray px-6 py-4 border-b-4 border-parking-primary-blue">
+                <div class="max-w-7xl mx-auto flex items-center justify-between">
+                    <!-- Logo -->
+                    <a href="{{ route('welcome') }}" class="flex items-center">
+                        <div class="w-12 h-12 bg-parking-primary-blue rounded-lg flex items-center justify-center">
+                            <span class="text-white font-bold text-2xl">P</span>
+                        </div>
+                    </a>
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+                    <!-- Navigation Links -->
+                    <nav class="flex items-center gap-8">
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="text-gray-800 font-bold hover:underline">Accueil</a>
+                            <a href="{{ route('dashboard') }}" class="text-gray-800 font-bold hover:underline">Réservation</a>
+                            <form method="POST" action="{{ route('logout') }}" class="inline">
+                                @csrf
+                                <button type="submit" class="text-gray-800 font-bold hover:underline">Déconnecté</button>
+                            </form>
+                        @else
+                            <a href="{{ route('login') }}" class="text-gray-800 font-bold hover:underline">Connexion</a>
+                            <a href="{{ route('register') }}" class="text-gray-800 font-bold hover:underline">Inscription</a>
+                        @endauth
+                    </nav>
+                </div>
+            </header>
 
             <!-- Page Content -->
-            <main>
+            <main class="flex-1 w-full">
                 {{ $slot }}
             </main>
         </div>

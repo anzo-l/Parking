@@ -14,6 +14,15 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                parking: {
+                    'primary-blue': '#003d7a',
+                    'light-gray': '#c0c0c0',
+                    'dark-gray': '#6b7b8b',
+                    'panel-gray': '#d3d3d3',
+                    'header-gray': '#b8b8b8',
+                },
+            },
         },
     },
 
