@@ -174,4 +174,42 @@ class AdminController extends Controller
 
         return redirect()->route('admin')->with('success', 'Utilisateur promu et place assignée');
     }
+
+    // HISTORIQUE ATTRIBUTIONS
+    public function edit_historique($id)
+    {
+        $record = HistoriqueAttributions::findOrFail($id);
+        $users = User::where('is_admin', false)->get();
+        $places = ParkingSpace::all();
+
+        return view('admin.historique.edit', [
+            'record' => $record,
+            'users' => $users,
+            'places' => $places,
+        ]);
+    }
+
+    public function update_historique(Request $request, $id)
+    {
+        $record = HistoriqueAttributions::findOrFail($id);
+
+        $validated = $request->validate([
+            'utilisateur_id' => 'required|exists:users,id',
+            'parking_space_id' => 'required|exists:parking_spaces,id',
+            'date_debut' => 'required|date',
+            'date_fin' => 'nullable|date|after_or_equal:date_debut',
+        ]);
+
+        $record->update($validated);
+
+        return redirect()->route('admin')->with('success', 'Historique modifié avec succès');
+    }
+
+    public function delete_historique($id)
+    {
+        $record = HistoriqueAttributions::findOrFail($id);
+        $record->delete();
+
+        return redirect()->route('admin')->with('success', 'Historique supprimé avec succès');
+    }
 }

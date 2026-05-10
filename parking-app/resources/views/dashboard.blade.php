@@ -21,6 +21,22 @@
                 </div>
             @endif
 
+            @if(auth()->user()?->is_admin)
+                <div class="bg-parking-primary-blue text-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h3 class="text-xl font-semibold">👑 Espace Administrateur</h3>
+                                <p class="text-sm text-white/80 mt-2">Accédez rapidement à la gestion des utilisateurs, des places, de la file d'attente et de l'historique.</p>
+                            </div>
+                            <a href="{{ route('admin') }}" class="inline-flex items-center justify-center bg-white text-parking-primary-blue font-bold py-2 px-5 rounded-full shadow-sm hover:bg-gray-100 transition">
+                                Aller à l'administration
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             <!-- Place Actuelle Assignée -->
             @if($currentParking)
                 <div class="bg-blue-100 dark:bg-blue-900 overflow-hidden shadow-sm sm:rounded-lg mb-4">
@@ -118,6 +134,78 @@
                     </div>
                 </div>
             @endif
+
+            <!-- Historique des Attributions -->
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg mt-6">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+                    <h3 class="text-lg font-semibold mb-4">📋 Historique de vos Attributions</h3>
+                    
+                    @if($historique && count($historique) > 0)
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-gray-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-2">Place N°</th>
+                                        <th class="px-4 py-2">Type</th>
+                                        <th class="px-4 py-2">Date Début</th>
+                                        <th class="px-4 py-2">Date Fin</th>
+                                        <th class="px-4 py-2">Durée</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($historique as $entry)
+                                        <tr class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                            <td class="px-4 py-2 font-bold text-parking-primary-blue">
+                                                {{ $entry->parking_space->numero_place }}
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <span class="px-2 py-1 rounded text-white text-xs 
+                                                    {{ $entry->parking_space->type_place === 'pmr' ? 'bg-green-500' : ($entry->parking_space->type_place === 'reserve' ? 'bg-purple-500' : 'bg-gray-500') }}">
+                                                    {{ ucfirst($entry->parking_space->type_place) }}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                @if(is_string($entry->date_debut))
+                                                    {{ \Carbon\Carbon::parse($entry->date_debut)->format('d/m/Y H:i') }}
+                                                @else
+                                                    {{ $entry->date_debut->format('d/m/Y H:i') }}
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                @if($entry->date_fin)
+                                                    @if(is_string($entry->date_fin))
+                                                        {{ \Carbon\Carbon::parse($entry->date_fin)->format('d/m/Y H:i') }}
+                                                    @else
+                                                        {{ $entry->date_fin->format('d/m/Y H:i') }}
+                                                    @endif
+                                                @else
+                                                    <span class="text-gray-500">-</span>
+                                                @endif
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                @if($entry->date_fin)
+                                                    @php
+                                                        $start = is_string($entry->date_debut) ? \Carbon\Carbon::parse($entry->date_debut) : $entry->date_debut;
+                                                        $end = is_string($entry->date_fin) ? \Carbon\Carbon::parse($entry->date_fin) : $entry->date_fin;
+                                                        $days = $end->diffInDays($start);
+                                                    @endphp
+                                                    {{ $days }} jour(s)
+                                                @else
+                                                    <span class="text-gray-500">-</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-gray-600 dark:text-gray-400">
+                            Aucune attribution antérieure. Vous n'avez pas encore eu de place de parking assignée.
+                        </p>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>

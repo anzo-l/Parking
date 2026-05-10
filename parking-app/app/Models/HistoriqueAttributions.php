@@ -9,6 +9,11 @@ class HistoriqueAttributions extends Model
     protected $fillable = ['utilisateur_id', 'parking_space_id', 'date_debut', 'date_fin'];
     protected $table = 'historique_attributions';
 
+    protected $casts = [
+        'date_debut' => 'datetime',
+        'date_fin' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'utilisateur_id');

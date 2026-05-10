@@ -31,6 +31,9 @@
                         @auth
                             <a href="{{ route('dashboard') }}" class="text-gray-800 font-bold hover:underline">Accueil</a>
                             <a href="{{ route('dashboard') }}" class="text-gray-800 font-bold hover:underline">Réservation</a>
+                            @if(auth()->user()?->is_admin)
+                                <a href="{{ route('admin') }}" class="text-parking-primary-blue font-bold hover:underline">Administration</a>
+                            @endif
                             <form method="POST" action="{{ route('logout') }}" class="inline">
                                 @csrf
                                 <button type="submit" class="text-gray-800 font-bold hover:underline">Déconnecté</button>

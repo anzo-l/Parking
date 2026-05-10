@@ -43,6 +43,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     // Gestion file d'attente
     Route::delete('/admin/waitlist/{id}', [AdminController::class, 'remove_from_waitlist'])->name('admin.waitlist.destroy');
     Route::post('/admin/waitlist/{id}/promote', [AdminController::class, 'promote_from_waitlist'])->name('admin.waitlist.promote');
+
+    // Historique des attributions
+    Route::get('/admin/historique/{id}/edit', [AdminController::class, 'edit_historique'])->name('admin.historique.edit');
+    Route::put('/admin/historique/{id}', [AdminController::class, 'update_historique'])->name('admin.historique.update');
+    Route::delete('/admin/historique/{id}', [AdminController::class, 'delete_historique'])->name('admin.historique.destroy');
 });
 
 require __DIR__.'/auth.php';
